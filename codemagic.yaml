@@ -14,18 +14,19 @@ workflows:
         - $HOME/.gradle/caches
         - $HOME/Library/Caches/CocoaPods
     scripts:
-      - name: Get Flutter packages
-        script: flutter pub get
-      
-      - name: Setup local.properties
-        script: echo "flutter.sdk=$HOME/programs/flutter" > "$CM_BUILD_DIR/android/local.properties"
-      
-      - name: Flutter analyze
-        script: flutter analyze
-        ignore_failure: true
-      
-      - name: Build APK (debug)
-        script: flutter build apk --debug
+  - name: Get Flutter packages
+    script: flutter pub get
+  
+  - name: Setup local.properties
+    script: echo "flutter.sdk=$HOME/programs/flutter" > "$CM_BUILD_DIR/android/local.properties"
+  
+  - name: Flutter analyze
+    script: flutter analyze
+    ignore_failure: true
+  
+  - name: Build APK (debug)
+    script: flutter build apk --debug --flavor development -t lib/main_development.dart
+
 
     artifacts:
       - build/app/outputs/**/*.apk
