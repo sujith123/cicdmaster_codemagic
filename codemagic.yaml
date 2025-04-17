@@ -2,11 +2,14 @@ workflows:
   debug-build:
     name: Debug Build Workflow
     instance_type: mac_mini_m1
-    max_build_duration: 30
+    max_build_duration: 60
     environment:
       flutter: 3.22.3
       xcode: latest
       java: 17
+      groups:
+        - shorebird
+        - google_credentials
     cache:
       cache_paths:
         - $HOME/.pub-cache
@@ -14,19 +17,37 @@ workflows:
         - $HOME/.gradle/caches
         - $HOME/Library/Caches/CocoaPods
     scripts:
-  - name: Get Flutter packages
-    script: flutter pub get
-  
-  - name: Setup local.properties
-    script: echo "flutter.sdk=$HOME/programs/flutter" > "$CM_BUILD_DIR/android/local.properties"
-  
-  - name: Flutter analyze
-    script: flutter analyze
-    ignore_failure: true
-  
-  - name: Build APK (debug)
-    script: flutter build apk --debug --flavor development -t lib/main_development.dart
+      - name: Get flavor based on branch
+        script: |
+          CURRENT_BRANCH=${CM_BRANCH}
+          if [[ "$CURRENT_BRANCH" == "master" ]]; then
+            FLAVOR="production"
+          elif [[ "$CURRENT_BRANCH" == "staging" ]]; then
+            FLAVOR="staging"
+          else
+            FLAVOR="development"
+          fi
+          echo "FLAVOR=$FLAVOR" >> $CM_ENV
+          echo "Building for flavor: $FLAVOR"
+          
+      - name: Get Flutter packages
+        script: flutter pub get
 
+      - name: Set up local.properties
+        script: echo "flutter.sdk=$HOME/programs/flutter" > "$CM_BUILD_DIR/android/local.properties"
 
+      - name: Analyze project (optional)
+        script: flutter analyze
+        ignore_failure: true
+      
+      - name: Build APK (Debug)
+        script: |
+          flutter build apk --debug --flavor $FLAVOR -t lib/main_${FLAVOR}.dart
+          
     artifacts:
-      - build/app/outputs/**/*.apk
+      - build/app/outputs/flutter-apk/*.apk
+
+    publishing:
+      email:
+        recipients:
+          - karlihasann@gmail.com
