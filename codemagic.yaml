@@ -8,8 +8,7 @@ workflows:
       xcode: latest
       java: 17
       groups:
-        - shorebird
-        - google_credentials
+        - mygroup
     cache:
       cache_paths:
         - $HOME/.pub-cache
@@ -29,18 +28,32 @@ workflows:
           fi
           echo "FLAVOR=$FLAVOR" >> $CM_ENV
           echo "Building for flavor: $FLAVOR"
-          
+
       - name: Get Flutter packages
         script: flutter pub get
 
       - name: Set up local.properties
         script: echo "flutter.sdk=$HOME/programs/flutter" > "$CM_BUILD_DIR/android/local.properties"
 
+      - name: Decode keystore from environment variable
+        script: |
+          mkdir -p $HOME/.keystore
+          echo $KEYSTORE_BASE64 | base64 --decode > $HOME/.keystore/upload-keystore.jks
+
+      - name: Create signing config
+        script: |
+          cat >> android/key.properties <<EOF
+          storePassword=$KEYSTORE_PASSWORD
+          keyPassword=$KEY_PASSWORD
+          keyAlias=$KEY_ALIAS
+          storeFile=$HOME/.keystore/upload-keystore.jks
+          EOF
+
       - name: Analyze project (optional)
         script: flutter analyze
         ignore_failure: true
-      
-      - name: Build Android APK (Debug)
+
+      - name: Build signed APK (Debug)
         script: |
           flutter build apk --debug --flavor $FLAVOR -t lib/main_${FLAVOR}.dart
 
