@@ -30,7 +30,7 @@ class _AppState extends State<App> {
         primarySwatch: Colors.blue,
       ),
       home: _flavorBanner(
-        child: MyHomePage(),
+        child: const MyHomePage(),
         show: kDebugMode,
       ),
     );

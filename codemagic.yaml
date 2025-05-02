@@ -67,6 +67,10 @@ workflows:
         script: |
           flutter build ios --debug --no-codesign --flavor $FLAVOR -t lib/main_${FLAVOR}.dart
 
+      - name: Run unit tests
+        script: |
+          flutter pub run build_runner build --delete-conflicting-outputs 
+          flutter test
     artifacts:
       - build/app/outputs/flutter-apk/*.apk
       - build/ios/iphoneos/*.app

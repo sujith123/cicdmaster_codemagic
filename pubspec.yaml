@@ -12,6 +12,8 @@ dependencies:
   shorebird_code_push: ^1.1.4
 
 dev_dependencies:
+  mockito: ^5.4.2
+  build_runner: ^2.4.7
   flutter_flavorizr: ^2.2.3
   flutter_lints: ^3.0.0
   flutter_test:
